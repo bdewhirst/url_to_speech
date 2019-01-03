@@ -1,17 +1,8 @@
 import urllib.request
 
-import re
 from gtts import gTTS
+from bs4 import BeautifulSoup
 
-
-def stripper(data):
-    """ remove html/xml as well as header
-        note: printing unicode doesn't work as expected, but it'll translate to audio fine.
-        note: currently doesn't remove header info/ select body.
-    """
-    return re.sub('<[^<]+?>', '', re.sub('<head>+?</nav>', '', data))
-
-    
 def reader(
     a_file,
     a_url,
@@ -23,12 +14,12 @@ def reader(
     """
     print("accessing", a_url)
     with urllib.request.urlopen(a_url) as the_url:
-        blabla = the_url.read()
-        
-    blabla = blabla.decode("utf-8")
+        raw_page = the_url.read()
 
-    blabla = stripper(blabla)
-    tts = gTTS(text=blabla, lang='en')
+    parsed_html = BeautifulSoup(raw_page, features="html.parser")
+    title = parsed_html.head.find('title').text  # for testing purposes, only convert the title.
+
+    tts = gTTS(text=title, lang='en')
     print("calling Google's api and saving result-- this is the slow part.", a_file)
     tts.save(a_file)
 
